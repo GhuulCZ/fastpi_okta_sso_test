@@ -7,8 +7,8 @@ import string
 import hashlib
 import os
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, Cookie
+from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from starlette.config import Config
@@ -16,6 +16,21 @@ from typing import List
 
 
 authorization_list = {}
+
+index_html = """
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Successful - Close Now</title>
+</head>
+<body>
+  <p>Thanks USER_EMAIL</p>
+  <h1>You can close this window now</h1>
+  <!-- <button onclick="window.close()">Close Window</button> -->
+</body>
+</html>
+"""
+
 
 
 class ssoConfig(BaseModel):
@@ -187,8 +202,24 @@ async def callback(
         raise SSOException(message="unable to get access token")
     token = await decode_token(access_token)
     log.debug(f"TOKEN: {token}")
-    return token.get("sub")
+    log.info(f"user: {token.get('sub')}")
 
+    response = RedirectResponse("/close")
+    response.set_cookie(key="usermail", value=token.get("sub"))
+    return response
+
+
+@app.get("/close")
+async def close_now(
+        request: Request
+    ):
+    global index_html
+
+    usermail = request.cookies.get("usermail")
+    index_html = index_html.replace("USER_EMAIL", usermail)
+    return HTMLResponse(
+        content=index_html
+    )
 
 @app.get("/authlist")
 async def get_authlist():

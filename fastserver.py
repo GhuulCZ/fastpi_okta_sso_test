@@ -35,7 +35,7 @@ class SSOException(Exception):
 
 
 # logging helpers
-if os.path.exists("/etc/kyndryl/sso_debug"):
+if os.path.exists("/etc/sso_debug"):
     logging.basicConfig(level=logging.DEBUG)
 
 log = logging

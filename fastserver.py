@@ -252,11 +252,10 @@ class FastApp:
             kwargs={
                 "host": "127.0.0.1",
                 "port": 8000,
-                "log_level": "info"
+                "log_level": "critical"
                 },
             daemon=True)
         proc.start()
         # self.queue = q
         self.queue.put(["SSO", "Global queue connected"])
         return proc
-    

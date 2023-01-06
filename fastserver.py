@@ -6,6 +6,8 @@ import random
 import string
 import hashlib
 import os
+import uvicorn
+
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, Cookie
 from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
@@ -14,6 +16,10 @@ from pydantic import BaseModel
 from starlette.config import Config
 from typing import List
 
+from multiprocessing import Process, Queue
+
+
+GLOBALQ = Queue()
 
 authorization_list = {}
 
@@ -31,6 +37,8 @@ index_html = """
 </html>
 """
 
+
+USERMAIL = None
 
 
 class ssoConfig(BaseModel):
@@ -133,6 +141,7 @@ async def decode_token(data: str):
 
 
 app = FastAPI()
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 config = config_load()
 
@@ -214,9 +223,13 @@ async def close_now(
         request: Request
     ):
     global index_html
+    global USERMAIL
 
     usermail = request.cookies.get("usermail")
     index_html = index_html.replace("USER_EMAIL", usermail)
+    USERMAIL = usermail
+    GLOBALQ.put(["SSO_DONE", USERMAIL])
+
     return HTMLResponse(
         content=index_html
     )
@@ -224,3 +237,26 @@ async def close_now(
 @app.get("/authlist")
 async def get_authlist():
     return authorization_list
+
+
+class FastApp:
+    def __init__(self) -> None:
+        self.usermail = None
+        self.queue = GLOBALQ
+        pass
+
+    def start_server(self, q: Queue = None):
+        proc = Process(
+            target=uvicorn.run,
+            args=(app,),
+            kwargs={
+                "host": "127.0.0.1",
+                "port": 8000,
+                "log_level": "info"
+                },
+            daemon=True)
+        proc.start()
+        # self.queue = q
+        self.queue.put(["SSO", "Global queue connected"])
+        return proc
+    

@@ -174,6 +174,31 @@ serverHost = "127.0.0.1"
 serverPort = 8000
 
 class LocalServer(BaseHTTPRequestHandler):
+    def _get_params(self, path:str):
+        params = {}
+        get_query = path.split("?")
+        if not len(get_query) == 2:
+            return params
+        get_params = get_query[1].split("&")
+        for get_param in get_params:
+            get_vars = get_param.split("=")
+            if len(get_vars) == 1:
+                params.update({get_vars[0]: None})
+            elif len(get_vars) == 2:
+                params.update({get_vars[0]: get_vars[1]})
+            else:
+                logging.warning(f"unable to get data from {get_params}")
+        return params
+
+    def _json_response(self, code, message: dict = None):
+        data = {"message": "nothing here, move away"}
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        if not message:
+            message = data
+        self.wfile.write(bytes(json.dumps(message), "utf-8"))
+
     def log_message(self, format, *args):
         pass
 
@@ -181,18 +206,13 @@ class LocalServer(BaseHTTPRequestHandler):
         global GLOBALQ
         path = self.path
         logging.debug(f"path: {path}")
-
         if path == "/close":
             self.send_response(200)
             self.send_header("Content-Type", "text/html")
             self.end_headers()
             self.wfile.write(bytes(index_html, "utf-8"))
         elif path == "/":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            test_dit = {"message": "nothing here, move away"}
-            self.wfile.write(bytes(json.dumps(test_dit), "utf-8"))
+            self._json_response(200, )
         elif path == "/login":
             GLOBALQ.put(["SSO_LOGIN", 1])
             verify_code = generate_pkce_code()
@@ -201,23 +221,21 @@ class LocalServer(BaseHTTPRequestHandler):
             self.send_response(302)
             self.send_header("Location", f"{url}")
             self.end_headers()
-        elif path.startswith("/callback?"):
+        elif path.startswith("/callback"):
             GLOBALQ.put(["SSO_CALLBACK", 1])
-            req = self.parse_request()
-            logging.debug(req)
+            params = self._get_params(path)
+            logging.debug(params)
+            code = params.get("code")
+            state = params.get("state")
+            if not all([code, state]):
+                response = {"error": "missing state or code in request"}
+                self._json_response(401, response)
+            
         else:
             self.send_response(404)
 
 
 
-# @app.get("/callback")
-# async def callback(
-#         request: Request
-#     ):
-
-#     params = request.query_params
-#     code = params.get("code")
-#     state = params.get("state")
 #     if not all([code, state]):
 #         raise SSOException(message="code or state not present")
 

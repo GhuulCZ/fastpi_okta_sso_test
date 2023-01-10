@@ -19,7 +19,7 @@ def start_sso_login():
     
     # some vars
     tries = 0
-    browser = False
+    browser = True
     max_tries = 5
     max_timeout = 600
     wait_timeout = 1
@@ -35,6 +35,7 @@ def start_sso_login():
         
         # start browser just once (or maybe more time)
         if not browser:
+            logging.info("open default web browser")
             webbrowser.open("http://127.0.0.1:8000/login")
             browser = True
             tries = 0
@@ -42,20 +43,21 @@ def start_sso_login():
         # check if we have something in message queue
         try:
             message = GLOBALQ.get(timeout=1)
-            print(message)
+            logging.debug(f"Q: {message}")
             if message[0] == "SSO_DONE":
+                logging.info("we have response from /login")
                 SSO_USERMAIL = message[1]
                 SERVERPROC.terminate()
             elif message[0] == "SSO_LOGIN":
-                print(f"login number: {tries}")
+                logging.info(f"login number: {tries}")
                 tries += 1
         except:
             if (timeout%print_timeout) == 0:
-                print(f"local web server is running (up for {timeout} seconds)")
+                logging.info(f"local web server is running (up for {timeout} seconds)")
 
         # too much tries?
         if tries > max_tries:
-            print("maximum number of tries reached, bailing out...")
+            logging.warning("maximum number of tries reached, bailing out...")
             SERVERPROC.terminate()
 
         time.sleep(wait_timeout)

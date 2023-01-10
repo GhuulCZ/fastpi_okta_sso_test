@@ -12,6 +12,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import List
 from multiprocessing import Process, Queue
 
+
 GLOBALQ = Queue()
 
 authorization_list = {}
@@ -174,6 +175,7 @@ serverPort = 8000
 
 class LocalServer(BaseHTTPRequestHandler):
     def do_GET(self):
+        global GLOBALQ
         path = self.path
 
         if path == "/close":
@@ -192,7 +194,7 @@ class LocalServer(BaseHTTPRequestHandler):
             verify_code = generate_pkce_code()
             logging.debug(f"pkce verify code: {verify_code}")
             url = redirect_to_okta_login(config, verify_code)
-            self.send_response(301)
+            self.send_response(302)
             self.send_header("Location", f"{url}")
             self.end_headers()
         else:

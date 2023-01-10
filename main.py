@@ -1,15 +1,15 @@
 import os
-import uvicorn
 import time
 from multiprocessing import Process, Queue
-from fastserver import FastApp, GLOBALQ
+# from fastserver import FastApp, GLOBALQ
+from httplocalserver import GLOBALQ, HTTPLocalServer
 import webbrowser
 
 SERVERPROC = None
 SSO_USERMAIL = None
 
 if __name__ == "__main__":
-    app = FastApp()
+    app = HTTPLocalServer()
     # queue = Queue()
     SERVERPROC = app.start_server()
     webbrowser.open("http://127.0.0.1:8000/login")

@@ -230,50 +230,26 @@ class LocalServer(BaseHTTPRequestHandler):
             if not all([code, state]):
                 response = {"error": "missing state or code in request"}
                 self._json_response(401, response)
-            
+            if state not in authorization_list.keys():
+                response = {"error": "unknown state or verification code"}
+                self._json_response(401, response)
+            data = get_access_token(code, state)
+            access_token = data.get("access_token")
+            if not access_token:
+                response = {"error": "unable to get access token"}
+                self._json_response(401, response)
+            token = decode_token(access_token)
+            logging.debug(f"TOKEN: {token}")
+            USERMAIL = token.get('sub')
+            logging.info(f"user: {USERMAIL}")
+            GLOBALQ.put(["SSO_DONE", USERMAIL])
+            self.send_response(302)
+            self.send_header("Location", f"http://127.0.0.1:8000/close")
+            self.end_headers()
         else:
             self.send_response(404)
 
 
-
-#     if not all([code, state]):
-#         raise SSOException(message="code or state not present")
-
-#     if state not in authorization_list.keys():
-#         raise SSOException(message="unknown state code, please login again")
-
-#     data = await get_access_token(code, state)
-#     access_token = data.get("access_token")
-#     if not access_token:
-#         raise SSOException(message="unable to get access token")
-#     token = await decode_token(access_token)
-#     log.debug(f"TOKEN: {token}")
-#     log.info(f"user: {token.get('sub')}")
-
-#     response = RedirectResponse("/close")
-#     response.set_cookie(key="usermail", value=token.get("sub"))
-#     return response
-
-
-# @app.get("/close")
-# async def close_now(
-#         request: Request
-#     ):
-#     global index_html
-#     global USERMAIL
-
-#     usermail = request.cookies.get("usermail")
-#     index_html = index_html.replace("USER_EMAIL", usermail)
-#     USERMAIL = usermail
-#     GLOBALQ.put(["SSO_DONE", USERMAIL])
-
-#     return HTMLResponse(
-#         content=index_html
-#     )
-
-# @app.get("/authlist")
-# async def get_authlist():
-#     return authorization_list
 
 def simple_server_run():
     server = HTTPServer((serverHost, serverPort), LocalServer)

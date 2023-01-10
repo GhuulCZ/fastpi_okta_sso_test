@@ -52,6 +52,8 @@ def start_sso_login():
             if message[0] == "SSO_DONE":
                 logging.info("we have response from /login")
                 SSO_USERMAIL = message[1]
+                # wait a while before we close the server
+                time.sleep(5)
                 SERVERPROC.terminate()
             elif message[0] == "SSO_LOGIN":
                 logging.info(f"login number: {tries}")
@@ -63,6 +65,9 @@ def start_sso_login():
         # too much tries?
         if tries > max_tries:
             logging.warning("maximum number of tries reached, bailing out...")
+            SERVERPROC.terminate()
+        if timeout > max_timeout:
+            logging.critical("timeout")
             SERVERPROC.terminate()
 
         time.sleep(wait_timeout)

@@ -8,7 +8,7 @@ import hashlib
 import os
 
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 from typing import List
 from multiprocessing import Process, Queue
 
@@ -249,11 +249,11 @@ class LocalServer(BaseHTTPRequestHandler):
             self.end_headers()
         else:
             self.send_response(404)
-
+        self.flush_headers()
 
 
 def simple_server_run():
-    server = HTTPServer((serverHost, serverPort), LocalServer)
+    server = ThreadingHTTPServer((serverHost, serverPort), LocalServer)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

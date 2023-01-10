@@ -4,6 +4,12 @@ from multiprocessing import Process, Queue
 # from fastserver import FastApp, GLOBALQ
 from httplocalserver import GLOBALQ, HTTPLocalServer
 import webbrowser
+import logging
+
+# logging helpers
+if os.path.exists("/etc/sso_debug"):
+    print("debug logging enabled")
+    logging.basicConfig(level=logging.DEBUG)
 
 SERVERPROC = None
 SSO_USERMAIL = None
@@ -41,6 +47,7 @@ def start_sso_login():
                 SSO_USERMAIL = message[1]
                 SERVERPROC.terminate()
             elif message[0] == "SSO_LOGIN":
+                print(f"login number: {tries}")
                 tries += 1
         except:
             if (timeout%print_timeout) == 0:

@@ -57,17 +57,11 @@ class ssoConfig():
 
 class SSOException(Exception):
     def __init__(self, status: int = 400, message: str = "No details") -> None:
-        log.warning(f"SOO exception: {message} [{status}]")
+        logging.warning(f"SOO exception: {message} [{status}]")
         self.message = message
         self.status = status
         pass
 
-
-# logging helpers
-if os.path.exists("/etc/sso_debug"):
-    logging.basicConfig(level=logging.DEBUG)
-
-log = logging
 
 def config_load(filename: str = "secret.json") -> ssoConfig:
     config = None
@@ -99,7 +93,7 @@ def get_access_token(
     ):
 
     verify_code = authorization_list.get(state)
-    log.debug(f"verify code: {verify_code}")
+    logging.debug(f"verify code: {verify_code}")
     
     if not verify_code:
         raise SSOException(
@@ -114,7 +108,7 @@ def get_access_token(
         "code_verifier": verify_code
     }
 
-    log.debug(f"request data: {data}")
+    logging.debug(f"request data: {data}")
 
     request = requests.post(
         url=config.token_uri,
@@ -122,9 +116,9 @@ def get_access_token(
         allow_redirects=False
     )
 
-    log.debug(request)
-    log.info(f"request status: {request.status_code}")
-    log.debug(f"token: {request.text}")
+    logging.debug(request)
+    logging.info(f"request status: {request.status_code}")
+    logging.debug(f"token: {request.text}")
 
     if (not request.status_code == 200 or not request.json()):
         raise SSOException(message="unable to request token from Okta")
@@ -170,7 +164,7 @@ def redirect_to_okta_login(
     params = list(f"{k}={v}" for k,v in params.items())
     params = "&".join(params)
     get_url = f"{config.auth_uri}?{params}"
-    log.debug(f"redirect uri: {get_url}")
+    logging.debug(f"redirect uri: {get_url}")
     return get_url
 
 
@@ -196,7 +190,7 @@ class LocalServer(BaseHTTPRequestHandler):
         elif path == "/login":
             GLOBALQ.put(["SSO_LOGIN", 1])
             verify_code = generate_pkce_code()
-            log.debug(f"pkce verify code: {verify_code}")
+            logging.debug(f"pkce verify code: {verify_code}")
             url = redirect_to_okta_login(config, verify_code)
             self.send_response(301)
             self.send_header("Location", f"{url}")

@@ -24,7 +24,7 @@ index_html = """
   <title>Login Successful - Close Now</title>
 </head>
 <body>
-  <p>Thanks USER_EMAIL</p>
+  <p>SSO Complete</p>
   <h1>You can close this window now</h1>
   <!-- <button onclick="window.close()">Close Window</button> -->
 </body>

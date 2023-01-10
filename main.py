@@ -73,7 +73,7 @@ def start_sso_login():
         time.sleep(wait_timeout)
         timeout += wait_timeout
         
-    print(f"we have usermail: {SSO_USERMAIL}")
+    log.info(f"we have usermail: {SSO_USERMAIL}")
     return SSO_USERMAIL
 
 if __name__ == "__main__":

@@ -39,10 +39,10 @@ def start_sso_login():
     while SERVERPROC.is_alive():
         
         # start browser just once (or maybe more time)
-        if not browser:
+        if browser:
             logging.info("open default web browser")
             webbrowser.open("http://127.0.0.1:8000/login")
-            browser = True
+            browser = False
             tries = 0
 
         # check if we have something in message queue

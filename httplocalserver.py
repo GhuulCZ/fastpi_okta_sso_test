@@ -220,6 +220,7 @@ class LocalServer(BaseHTTPRequestHandler):
             url = redirect_to_okta_login(config, verify_code)
             self.send_response(302)
             self.send_header("Location", f"{url}")
+            logging.debug(f"redirect url: {url}")
             self.end_headers()
         elif path.startswith("/callback"):
             GLOBALQ.put(["SSO_CALLBACK", 1])

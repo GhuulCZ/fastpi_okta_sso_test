@@ -10,17 +10,30 @@ SSO_USERMAIL = None
 
 
 def start_sso_login():
+    
+    # some vars
     tries = 0
+    browser = False
     max_tries = 5
     max_timeout = 600
     wait_timeout = 1
     timeout = 0
     print_timeout = 5
+    
+    # start server
     app = HTTPLocalServer()
-    # queue = Queue()
     SERVERPROC = app.start_server()
-    webbrowser.open("http://127.0.0.1:8000/login")
+    
+    
     while SERVERPROC.is_alive():
+        
+        # start browser just once (or maybe more time)
+        if not browser:
+            webbrowser.open("http://127.0.0.1:8000/login")
+            browser = True
+            tries = 0
+
+        # check if we have something in message queue
         try:
             message = GLOBALQ.get(timeout=1)
             print(message)
@@ -33,6 +46,7 @@ def start_sso_login():
             if (timeout%print_timeout) == 0:
                 print(f"local web server is running (up for {timeout} seconds)")
 
+        # too much tries?
         if tries > max_tries:
             print("maximum number of tries reached, bailing out...")
             SERVERPROC.terminate()

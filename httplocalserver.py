@@ -171,7 +171,7 @@ def redirect_to_okta_login(
     params = "&".join(params)
     get_url = f"{config.auth_uri}?{params}"
     log.debug(f"redirect uri: {get_url}")
-    return get_url, params
+    return get_url
 
 
 config = config_load()
@@ -197,9 +197,9 @@ class LocalServer(BaseHTTPRequestHandler):
             GLOBALQ.put(["SSO_LOGIN", 1])
             verify_code = generate_pkce_code()
             log.debug(f"pkce verify code: {verify_code}")
-            url, params = redirect_to_okta_login(config, verify_code)
+            url = redirect_to_okta_login(config, verify_code)
             self.send_response(301)
-            self.send_header("Location", f"{url}?{params}")
+            self.send_header("Location", f"{url}")
             self.end_headers()
         else:
             self.send_response(404)

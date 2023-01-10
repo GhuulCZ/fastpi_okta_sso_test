@@ -174,9 +174,13 @@ serverHost = "127.0.0.1"
 serverPort = 8000
 
 class LocalServer(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
     def do_GET(self):
         global GLOBALQ
         path = self.path
+        logging.debug(f"path: {path}")
 
         if path == "/close":
             self.send_response(200)
@@ -197,27 +201,13 @@ class LocalServer(BaseHTTPRequestHandler):
             self.send_response(302)
             self.send_header("Location", f"{url}")
             self.end_headers()
+        elif path.startswith("/callback?"):
+            GLOBALQ.put(["SSO_CALLBACK", 1])
+            req = self.parse_request()
+            logging.debug(req)
         else:
             self.send_response(404)
 
-
-# @app.exception_handler(SSOException)
-# async def hubgrade_exception_handler(request: Request, exc: SSOException) -> Response:
-#     return JSONResponse(
-#         status_code= exc.status,
-#         content={
-#             "message": exc.message,
-#         }
-#     )
-
-
-# @app.get("/login", response_class=RedirectResponse)
-# async def login(
-#         request: Request
-#     ) -> RedirectResponse:
-#     verify_code = await generate_pkce_code()
-#     log.debug(f"verify code: {verify_code}")
-#     return await redirect_to_okta_login(request, config, verify_code)
 
 
 # @app.get("/callback")

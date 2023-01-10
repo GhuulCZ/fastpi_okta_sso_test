@@ -6,10 +6,15 @@ from httplocalserver import GLOBALQ, HTTPLocalServer
 import webbrowser
 import logging
 
+
 # logging helpers
+STANDARD_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
+DEBUG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s [%(module)s:%(funcName)s:%(lineno)s]"
 if os.path.exists("/etc/sso_debug"):
     print("debug logging enabled")
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format=DEBUG_FORMAT)
+else:
+    logging.basicConfig(level=logging.INFO, format=STANDARD_FORMAT)
 
 SERVERPROC = None
 SSO_USERMAIL = None

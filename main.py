@@ -41,7 +41,7 @@ def start_sso_login():
         # start browser just once (or maybe more time)
         if browser:
             logging.info("open default web browser")
-            webbrowser.open("http://127.0.0.1:8000/login")
+            webbrowser.open("http://127.0.0.1:8811/callback")
             browser = False
             tries = 0
 
@@ -50,7 +50,7 @@ def start_sso_login():
             message = GLOBALQ.get(timeout=1)
             logging.debug(f"Q: {message}")
             if message[0] == "SSO_DONE":
-                logging.info("we have response from /login")
+                logging.info("we have response from login")
                 SSO_USERMAIL = message[1]
                 # wait a while before we close the server
                 time.sleep(5)

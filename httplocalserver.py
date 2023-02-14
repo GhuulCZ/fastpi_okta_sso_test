@@ -44,7 +44,8 @@ class ssoConfig():
         redirect_uri: str,
         issuer: str,
         token_uri: str,
-        userinfo_uri: str
+        userinfo_uri: str,
+        **kwargs
         ) -> None:
         self.auth_uri = auth_uri
         self.client_id = client_id
@@ -171,7 +172,7 @@ def redirect_to_okta_login(
 
 config = config_load()
 serverHost = "127.0.0.1"
-serverPort = 8000
+serverPort = 8811
 
 class LocalServer(BaseHTTPRequestHandler):
     def _get_params(self, path:str):

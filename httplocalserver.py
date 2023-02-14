@@ -246,7 +246,7 @@ class LocalServer(BaseHTTPRequestHandler):
             logging.info(f"user: {USERMAIL}")
             GLOBALQ.put(["SSO_DONE", USERMAIL])
             self.send_response(302)
-            self.send_header("Location", f"http://127.0.0.1:8000/close")
+            self.send_header("Location", f"http://127.0.0.1:8811/close")
             self.end_headers()
         else:
             self.send_response(404)

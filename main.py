@@ -41,7 +41,7 @@ def start_sso_login():
         # start browser just once (or maybe more time)
         if browser:
             logging.info("open default web browser")
-            webbrowser.open("http://127.0.0.1:8811/callback")
+            webbrowser.open("http://127.0.0.1:8811/login")
             browser = False
             tries = 0
 
